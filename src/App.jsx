@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Check, Sparkles, User, LogOut, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Calendar, Check, Sparkles, User, LogOut, Mail, Lock, Eye, EyeOff, Settings } from 'lucide-react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, collection } from 'firebase/firestore';
@@ -41,15 +41,108 @@ const DailyTracker = () => {
   });
   const [showCelebration, setShowCelebration] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
+  const [userSettings, setUserSettings] = useState({
+    theme: 'default',
+    visibleCategories: {
+      productive: true,
+      healthy: true,
+      social: true,
+      creative: true,
+      kind: true,
+      mindful: true
+    },
+    customNames: {
+      productive: 'Productive',
+      healthy: 'Healthy',
+      social: 'Social',
+      creative: 'Creative',
+      kind: 'Kind',
+      mindful: 'Mindful'
+    }
+  });
+
+  const themePresets = {
+    default: {
+      name: 'Default',
+      background: 'from-blue-50 to-purple-50',
+      complete: 'bg-green-600',
+      partial: 'bg-green-200',
+      categories: {
+        productive: 'bg-blue-100 border-blue-300',
+        healthy: 'bg-green-100 border-green-300',
+        social: 'bg-purple-100 border-purple-300',
+        creative: 'bg-pink-100 border-pink-300',
+        kind: 'bg-yellow-100 border-yellow-300',
+        mindful: 'bg-indigo-100 border-indigo-300'
+      }
+    },
+    ocean: {
+      name: 'Ocean',
+      background: 'from-cyan-50 to-blue-100',
+      complete: 'bg-blue-600',
+      partial: 'bg-blue-200',
+      categories: {
+        productive: 'bg-cyan-100 border-cyan-300',
+        healthy: 'bg-teal-100 border-teal-300',
+        social: 'bg-sky-100 border-sky-300',
+        creative: 'bg-blue-100 border-blue-300',
+        kind: 'bg-indigo-100 border-indigo-300',
+        mindful: 'bg-violet-100 border-violet-300'
+      }
+    },
+    forest: {
+      name: 'Forest',
+      background: 'from-green-50 to-emerald-100',
+      complete: 'bg-emerald-600',
+      partial: 'bg-emerald-200',
+      categories: {
+        productive: 'bg-lime-100 border-lime-300',
+        healthy: 'bg-green-100 border-green-300',
+        social: 'bg-emerald-100 border-emerald-300',
+        creative: 'bg-teal-100 border-teal-300',
+        kind: 'bg-cyan-100 border-cyan-300',
+        mindful: 'bg-sky-100 border-sky-300'
+      }
+    },
+    sunset: {
+      name: 'Sunset',
+      background: 'from-orange-50 to-pink-100',
+      complete: 'bg-orange-600',
+      partial: 'bg-orange-200',
+      categories: {
+        productive: 'bg-yellow-100 border-yellow-300',
+        healthy: 'bg-orange-100 border-orange-300',
+        social: 'bg-red-100 border-red-300',
+        creative: 'bg-pink-100 border-pink-300',
+        kind: 'bg-rose-100 border-rose-300',
+        mindful: 'bg-purple-100 border-purple-300'
+      }
+    },
+    minimal: {
+      name: 'Minimal',
+      background: 'from-gray-50 to-slate-100',
+      complete: 'bg-slate-700',
+      partial: 'bg-slate-300',
+      categories: {
+        productive: 'bg-gray-100 border-gray-300',
+        healthy: 'bg-slate-100 border-slate-300',
+        social: 'bg-zinc-100 border-zinc-300',
+        creative: 'bg-stone-100 border-stone-300',
+        kind: 'bg-neutral-100 border-neutral-300',
+        mindful: 'bg-gray-100 border-gray-400'
+      }
+    }
+  };
 
   const categories = [
-    { key: 'productive', label: 'Productive', color: 'bg-blue-100 border-blue-300' },
-    { key: 'healthy', label: 'Healthy', color: 'bg-green-100 border-green-300' },
-    { key: 'social', label: 'Social', color: 'bg-purple-100 border-purple-300' },
-    { key: 'creative', label: 'Creative', color: 'bg-pink-100 border-pink-300' },
-    { key: 'kind', label: 'Kind', color: 'bg-yellow-100 border-yellow-300' },
-    { key: 'mindful', label: 'Mindful', color: 'bg-indigo-100 border-indigo-300' }
-  ];
+    { key: 'productive', label: userSettings.customNames.productive, color: themePresets[userSettings.theme].categories.productive },
+    { key: 'healthy', label: userSettings.customNames.healthy, color: themePresets[userSettings.theme].categories.healthy },
+    { key: 'social', label: userSettings.customNames.social, color: themePresets[userSettings.theme].categories.social },
+    { key: 'creative', label: userSettings.customNames.creative, color: themePresets[userSettings.theme].categories.creative },
+    { key: 'kind', label: userSettings.customNames.kind, color: themePresets[userSettings.theme].categories.kind },
+    { key: 'mindful', label: userSettings.customNames.mindful, color: themePresets[userSettings.theme].categories.mindful }
+  ].filter(cat => userSettings.visibleCategories[cat.key]);
 
   const formatDateKey = (date) => {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -82,11 +175,26 @@ const DailyTracker = () => {
         if (data[today]) {
           setCurrentEntry(data[today]);
         }
+        
+        // Load user settings
+        const settings = docSnap.data().settings;
+        if (settings) {
+          setUserSettings(settings);
+        }
       }
     } catch (error) {
       console.error('Error loading data:', error);
     }
     setLoading(false);
+  };
+
+  const saveUserSettings = async (userId, settings) => {
+    try {
+      const docRef = doc(db, 'users', userId);
+      await setDoc(docRef, { settings: settings }, { merge: true });
+    } catch (error) {
+      console.error('Error saving settings:', error);
+    }
   };
 
   const saveUserData = async (userId, data) => {
@@ -174,8 +282,12 @@ const DailyTracker = () => {
       saveUserData(currentUser.uid, newEntries);
     }
 
-    const isComplete = categories.every(cat => newEntry[cat.key]?.trim() !== '');
-    if (isComplete && !showCelebration) {
+    // Check if all visible categories are complete
+    const visibleCats = ['productive', 'healthy', 'social', 'creative', 'kind', 'mindful']
+      .filter(key => userSettings.visibleCategories[key]);
+    const isComplete = visibleCats.every(key => newEntry[key]?.trim() !== '');
+    
+    if (isComplete && !showCelebration && visibleCats.length > 0) {
       setShowCelebration(true);
       setTimeout(() => setShowCelebration(false), 3000);
     }
@@ -183,7 +295,13 @@ const DailyTracker = () => {
 
   const getCompletionCount = (entry) => {
     if (!entry) return 0;
-    return categories.filter(cat => entry[cat.key]?.trim() !== '').length;
+    const visibleCategories = ['productive', 'healthy', 'social', 'creative', 'kind', 'mindful']
+      .filter(key => userSettings.visibleCategories[key]);
+    return visibleCategories.filter(key => entry[key]?.trim() !== '').length;
+  };
+
+  const getTotalVisibleCategories = () => {
+    return Object.values(userSettings.visibleCategories).filter(v => v).length;
   };
 
   const getCompletionStatus = (date) => {
@@ -191,8 +309,9 @@ const DailyTracker = () => {
     const entry = entries[dateKey];
     if (!entry) return 'empty';
     const count = getCompletionCount(entry);
-    if (count === 6) return 'complete';
-    if (count > 3) return 'partial';
+    const total = getTotalVisibleCategories();
+    if (count === total && total > 0) return 'complete';
+    if (count > total / 2) return 'partial';
     return 'empty';
   };
 
@@ -222,9 +341,10 @@ const DailyTracker = () => {
       const status = getCompletionStatus(date);
       const isSelected = date.toDateString() === selectedDate.toDateString();
       
+      const theme = themePresets[userSettings.theme];
       let bgColor = 'bg-gray-50 hover:bg-gray-100';
-      if (status === 'complete') bgColor = 'bg-green-600 hover:bg-green-700 text-white font-bold';
-      else if (status === 'partial') bgColor = 'bg-green-200 hover:bg-green-300';
+      if (status === 'complete') bgColor = `${theme.complete} hover:bg-opacity-90 text-white font-bold`;
+      else if (status === 'partial') bgColor = `${theme.partial} hover:bg-opacity-90`;
       
       days.push(
         <button
@@ -361,10 +481,11 @@ const DailyTracker = () => {
   }
 
   const completionCount = getCompletionCount(currentEntry);
-  const progressPercentage = (completionCount / 6) * 100;
+  const totalVisible = getTotalVisibleCategories();
+  const progressPercentage = totalVisible > 0 ? (completionCount / totalVisible) * 100 : 0;
 
   return (
-    <div className="h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex flex-col overflow-hidden">
+    <div className={`h-screen bg-gradient-to-br ${themePresets[userSettings.theme].background} flex flex-col overflow-hidden`}>
       {/* Header - Fixed at top */}
       <div className="flex-shrink-0 px-6 py-4 bg-white shadow-sm border-b">
         <div className="max-w-[1800px] mx-auto flex items-center justify-between">
@@ -372,13 +493,22 @@ const DailyTracker = () => {
             <h1 className="text-3xl font-bold text-gray-800">Daily Tracker</h1>
             <p className="text-gray-600 text-sm">{selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
-          >
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline text-sm">{currentUser.email}</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowSettings(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline text-sm">Settings</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline text-sm">{currentUser.email}</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -394,16 +524,16 @@ const DailyTracker = () => {
               <h3 className="font-bold text-gray-800 mb-3">Legend</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-green-600 rounded"></div>
-                  <span>All 6 areas complete</span>
+                  <div className={`w-6 h-6 ${themePresets[userSettings.theme].complete} rounded`}></div>
+                  <span>All areas complete</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-green-200 rounded"></div>
-                  <span>More than half complete (4-5)</span>
+                  <div className={`w-6 h-6 ${themePresets[userSettings.theme].partial} rounded`}></div>
+                  <span>More than half complete</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 bg-gray-50 border border-gray-300 rounded"></div>
-                  <span>Half or less (0-3)</span>
+                  <span>Half or less</span>
                 </div>
               </div>
             </div>
@@ -415,7 +545,7 @@ const DailyTracker = () => {
             <div className="bg-white rounded-xl shadow-lg p-5 flex-shrink-0">
               <div className="flex items-center justify-between mb-3">
                 <span className="font-semibold text-gray-700">Daily Progress</span>
-                <span className="text-sm font-bold text-blue-600">{completionCount}/6 Complete</span>
+                <span className="text-sm font-bold text-blue-600">{completionCount}/{totalVisible} Complete</span>
               </div>
               <div className="w-full h-5 bg-gray-200 rounded-full overflow-hidden">
                 <div 
@@ -513,6 +643,131 @@ const DailyTracker = () => {
           </div>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-800">Settings</h2>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Theme Presets */}
+              <div>
+                <h3 className="text-lg font-bold text-gray-800 mb-3">Theme</h3>
+                <p className="text-sm text-gray-600 mb-4">Choose a color scheme for your tracker</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {Object.keys(themePresets).map((themeKey) => (
+                    <button
+                      key={themeKey}
+                      onClick={() => {
+                        const newSettings = { ...userSettings, theme: themeKey };
+                        setUserSettings(newSettings);
+                        if (currentUser) {
+                          saveUserSettings(currentUser.uid, newSettings);
+                        }
+                      }}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        userSettings.theme === themeKey
+                          ? 'border-blue-500 bg-blue-50 shadow-md'
+                          : 'border-gray-300 hover:border-blue-300'
+                      }`}
+                    >
+                      <div className={`h-8 rounded bg-gradient-to-r ${themePresets[themeKey].background} mb-2`}></div>
+                      <p className="font-semibold text-sm text-gray-800">{themePresets[themeKey].name}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Toggle Categories */}
+              <div>
+                <h3 className="text-lg font-bold text-gray-800 mb-3">Visible Categories</h3>
+                <p className="text-sm text-gray-600 mb-4">Choose which categories to track</p>
+                <div className="space-y-3">
+                  {['productive', 'healthy', 'social', 'creative', 'kind', 'mindful'].map((key) => (
+                    <label key={key} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={userSettings.visibleCategories[key]}
+                        onChange={(e) => {
+                          const newSettings = {
+                            ...userSettings,
+                            visibleCategories: {
+                              ...userSettings.visibleCategories,
+                              [key]: e.target.checked
+                            }
+                          };
+                          setUserSettings(newSettings);
+                          if (currentUser) {
+                            saveUserSettings(currentUser.uid, newSettings);
+                          }
+                        }}
+                        className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="font-medium text-gray-800 capitalize">{userSettings.customNames[key]}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">Note: You need at least one category visible</p>
+              </div>
+
+              {/* Custom Category Names */}
+              <div>
+                <h3 className="text-lg font-bold text-gray-800 mb-3">Change Your Categories</h3>
+                <p className="text-sm text-gray-600 mb-4">Name your categories</p>
+                <div className="space-y-3">
+                  {['productive', 'healthy', 'social', 'creative', 'kind', 'mindful'].map((key, index) => (
+                    <div key={key} className="flex items-center gap-3">
+                      <label className="w-28 text-sm font-medium text-gray-600">
+                        Category {index + 1}:
+                      </label>
+                      <input
+                        type="text"
+                        value={userSettings.customNames[key]}
+                        onChange={(e) => {
+                          const newSettings = {
+                            ...userSettings,
+                            customNames: {
+                              ...userSettings.customNames,
+                              [key]: e.target.value
+                            }
+                          };
+                          setUserSettings(newSettings);
+                        }}
+                        onBlur={() => {
+                          if (currentUser) {
+                            saveUserSettings(currentUser.uid, userSettings);
+                          }
+                        }}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                        placeholder={`Enter name for category ${index + 1}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Close Button */}
+              <div className="pt-4 border-t">
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
