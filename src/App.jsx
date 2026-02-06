@@ -36,7 +36,8 @@ const DailyTracker = () => {
     creative: '',
     kind: '',
     mindful: '',
-    notes: ''
+    notes: '',
+    rating: null
   });
   const [showCelebration, setShowCelebration] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -110,7 +111,8 @@ const DailyTracker = () => {
           creative: '',
           kind: '',
           mindful: '',
-          notes: ''
+          notes: '',
+          rating: null
         });
       }
     }
@@ -152,7 +154,8 @@ const DailyTracker = () => {
         creative: '',
         kind: '',
         mindful: '',
-        notes: ''
+        notes: '',
+        rating: null
       });
     } catch (error) {
       console.error('Error signing out:', error);
@@ -268,7 +271,7 @@ const DailyTracker = () => {
   // Login/Signup Screen
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
           <div className="flex items-center justify-center mb-6">
             <Calendar className="w-12 h-12 text-blue-500 mr-3" />
@@ -351,7 +354,7 @@ const DailyTracker = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
         <div className="text-xl text-gray-600">Loading...</div>
       </div>
     );
@@ -422,6 +425,31 @@ const DailyTracker = () => {
               </div>
             </div>
 
+            {/* Day Rating */}
+            <div className="bg-white rounded-xl shadow-lg p-5 flex-shrink-0">
+              <h3 className="font-semibold text-gray-700 mb-3">Day Rating</h3>
+              <div className="flex gap-2 flex-wrap justify-center">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                  <button
+                    key={num}
+                    onClick={() => handleInputChange('rating', num)}
+                    className={`w-12 h-12 rounded-lg border-2 font-bold transition-all ${
+                      currentEntry.rating === num
+                        ? 'bg-blue-500 text-white border-blue-600 shadow-lg scale-110'
+                        : 'bg-gray-50 border-gray-300 hover:bg-gray-100 hover:border-blue-300'
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
+              {currentEntry.rating && (
+                <p className="text-center mt-3 text-sm text-gray-600">
+                  You rated today: <span className="font-bold text-blue-600">{currentEntry.rating}/10</span>
+                </p>
+              )}
+            </div>
+
             {/* Celebration Message */}
             {showCelebration && (
               <div className="bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-xl shadow-lg p-4 flex items-center animate-bounce flex-shrink-0">
@@ -472,7 +500,7 @@ const DailyTracker = () => {
               <textarea
                 value={currentEntry.notes || ''}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
-                placeholder="Any other thoughts, reflections, or notes about your days... Mac Edition"
+                placeholder="Any other thoughts, reflections, or notes about your day..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
                 rows="4"
               />
