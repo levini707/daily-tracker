@@ -472,7 +472,7 @@ const DailyTracker = () => {
               <textarea
                 value={currentEntry.notes || ''}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
-                placeholder="Any other thoughts, reflections, or notes about your day..."
+                placeholder="Any other thoughts, reflections, or notes about your days... Mac Edition"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
                 rows="4"
               />
