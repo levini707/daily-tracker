@@ -119,6 +119,34 @@ const DailyTracker = () => {
         mindful: 'bg-purple-100 border-purple-300'
       }
     },
+    slate: {
+      name: 'Slate',
+      background: 'from-slate-100 to-slate-200',
+      complete: 'bg-slate-600',
+      partial: 'bg-slate-300',
+      categories: {
+        productive: 'bg-slate-100 border-slate-300',
+        healthy: 'bg-slate-200 border-slate-400',
+        social: 'bg-gray-100 border-gray-300',
+        creative: 'bg-zinc-100 border-zinc-300',
+        kind: 'bg-stone-100 border-stone-300',
+        mindful: 'bg-neutral-100 border-neutral-300'
+      }
+    },
+    lavender: {
+      name: 'Deep Lavender',
+      background: 'from-purple-100 to-violet-200',
+      complete: 'bg-purple-700',
+      partial: 'bg-purple-300',
+      categories: {
+        productive: 'bg-purple-100 border-purple-300',
+        healthy: 'bg-violet-100 border-violet-300',
+        social: 'bg-fuchsia-100 border-fuchsia-300',
+        creative: 'bg-pink-100 border-pink-300',
+        kind: 'bg-rose-100 border-rose-300',
+        mindful: 'bg-indigo-100 border-indigo-300'
+      }
+    },
     minimal: {
       name: 'Minimal',
       background: 'from-gray-50 to-slate-100',
@@ -333,7 +361,7 @@ const DailyTracker = () => {
                         'July', 'August', 'September', 'October', 'November', 'December'];
 
     for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(<div key={`empty-${i}`} className="h-14"></div>);
+      days.push(<div key={`empty-${i}`} className="h-12"></div>);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -350,8 +378,8 @@ const DailyTracker = () => {
         <button
           key={day}
           onClick={() => setSelectedDate(date)}
-          className={`h-14 border rounded-lg flex items-center justify-center text-base transition-all ${bgColor} ${
-            isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+          className={`h-12 border rounded-lg flex items-center justify-center text-sm font-medium transition-all ${bgColor} ${
+            isSelected ? 'ring-2 ring-blue-500 ring-offset-1' : ''
           }`}
         >
           {day}
@@ -360,25 +388,25 @@ const DailyTracker = () => {
     }
 
     return (
-      <div className="bg-white rounded-xl shadow-lg p-6 flex-shrink-0">
-        <div className="flex items-center justify-between mb-5">
+      <div className="bg-white rounded-xl shadow-lg p-4 flex-shrink-0">
+        <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1))}
-            className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 font-semibold"
+            className="px-3 py-1.5 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 font-medium"
           >
             ←
           </button>
-          <h2 className="text-2xl font-bold">{monthNames[month]} {year}</h2>
+          <h2 className="text-xl font-semibold">{monthNames[month]} {year}</h2>
           <button
             onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1))}
-            className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 font-semibold"
+            className="px-3 py-1.5 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 font-medium"
           >
             →
           </button>
         </div>
-        <div className="grid grid-cols-7 gap-2 mb-3">
+        <div className="grid grid-cols-7 gap-1.5 mb-2">
           {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
-            <div key={idx} className="text-center font-semibold text-gray-600 text-sm">{day}</div>
+            <div key={idx} className="text-center font-medium text-gray-600 text-xs">{day}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-2">
@@ -487,26 +515,26 @@ const DailyTracker = () => {
   return (
     <div className={`h-screen bg-gradient-to-br ${themePresets[userSettings.theme].background} flex flex-col overflow-hidden`}>
       {/* Header - Fixed at top */}
-      <div className="flex-shrink-0 px-6 py-4 bg-white shadow-sm border-b">
+      <div className="flex-shrink-0 px-6 py-3 bg-white shadow-sm border-b">
         <div className="max-w-[1800px] mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Daily Tracker</h1>
-            <p className="text-gray-600 text-sm">{selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
+            <h1 className="text-2xl font-bold text-gray-800">Daily Tracker</h1>
+            <p className="text-gray-500 text-xs">{selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setShowSettings(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
             >
               <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline text-sm">Settings</span>
+              <span className="hidden sm:inline">Settings</span>
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline text-sm">{currentUser.email}</span>
+              <span className="hidden sm:inline">{currentUser.email}</span>
             </button>
           </div>
         </div>
@@ -516,38 +544,19 @@ const DailyTracker = () => {
       <div className="flex-1 overflow-hidden p-6">
         <div className="h-full max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Side - Calendar */}
-          <div className="flex flex-col gap-4 overflow-y-auto pr-2">
+          <div className="flex flex-col gap-3 overflow-y-auto pr-2">
             {renderCalendar()}
-            
-            {/* Legend */}
-            <div className="bg-white rounded-xl shadow-lg p-4 flex-shrink-0">
-              <h3 className="font-bold text-gray-800 mb-3">Legend</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className={`w-6 h-6 ${themePresets[userSettings.theme].complete} rounded`}></div>
-                  <span>All areas complete</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className={`w-6 h-6 ${themePresets[userSettings.theme].partial} rounded`}></div>
-                  <span>More than half complete</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-gray-50 border border-gray-300 rounded"></div>
-                  <span>Half or less</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Right Side - Entry Fields */}
-          <div className="flex flex-col gap-4 overflow-y-auto pr-2">
+          <div className="flex flex-col gap-3 overflow-y-auto pr-2">
             {/* Progress Bar */}
-            <div className="bg-white rounded-xl shadow-lg p-5 flex-shrink-0">
-              <div className="flex items-center justify-between mb-3">
-                <span className="font-semibold text-gray-700">Daily Progress</span>
-                <span className="text-sm font-bold text-blue-600">{completionCount}/{totalVisible} Complete</span>
+            <div className="bg-white rounded-xl shadow-lg p-4 flex-shrink-0">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-600">Daily Progress</span>
+                <span className="text-xs font-bold text-blue-600">{completionCount}/{totalVisible} Complete</span>
               </div>
-              <div className="w-full h-5 bg-gray-200 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500"
                   style={{ width: `${progressPercentage}%` }}
@@ -556,16 +565,16 @@ const DailyTracker = () => {
             </div>
 
             {/* Day Rating */}
-            <div className="bg-white rounded-xl shadow-lg p-5 flex-shrink-0">
-              <h3 className="font-semibold text-gray-700 mb-3">Day Rating</h3>
+            <div className="bg-white rounded-xl shadow-lg p-4 flex-shrink-0">
+              <h3 className="text-sm font-medium text-gray-600 mb-3">Day Rating</h3>
               <div className="flex gap-2 flex-wrap justify-center">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                   <button
                     key={num}
                     onClick={() => handleInputChange('rating', num)}
-                    className={`w-12 h-12 rounded-lg border-2 font-bold transition-all ${
+                    className={`w-10 h-10 rounded-lg border-2 font-semibold text-sm transition-all ${
                       currentEntry.rating === num
-                        ? 'bg-blue-500 text-white border-blue-600 shadow-lg scale-110'
+                        ? 'bg-blue-500 text-white border-blue-600 shadow-md scale-105'
                         : 'bg-gray-50 border-gray-300 hover:bg-gray-100 hover:border-blue-300'
                     }`}
                   >
@@ -574,7 +583,7 @@ const DailyTracker = () => {
                 ))}
               </div>
               {currentEntry.rating && (
-                <p className="text-center mt-3 text-sm text-gray-600">
+                <p className="text-center mt-2 text-xs text-gray-600">
                   You rated today: <span className="font-bold text-blue-600">{currentEntry.rating}/10</span>
                 </p>
               )}
@@ -582,33 +591,33 @@ const DailyTracker = () => {
 
             {/* Celebration Message */}
             {showCelebration && (
-              <div className="bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-xl shadow-lg p-4 flex items-center animate-bounce flex-shrink-0">
-                <Sparkles className="w-6 h-6 mr-3" />
+              <div className="bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-xl shadow-lg p-3 flex items-center animate-bounce flex-shrink-0">
+                <Sparkles className="w-5 h-5 mr-2.5" />
                 <div>
-                  <h3 className="text-lg font-bold">Congratulations!</h3>
-                  <p className="text-sm">You've completed all 6 areas today! 🎉</p>
+                  <h3 className="text-base font-semibold">Congratulations!</h3>
+                  <p className="text-xs">You've completed all areas today! 🎉</p>
                 </div>
               </div>
             )}
 
             {/* Category Cards */}
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-3">
               {categories.map((category) => {
                 const isComplete = currentEntry[category.key]?.trim() !== '';
                 return (
                   <div
                     key={category.key}
-                    className={`rounded-xl shadow-lg p-4 border-2 transition-all ${
+                    className={`rounded-xl shadow-lg p-3 border-2 transition-all ${
                       isComplete 
                         ? 'bg-green-100 border-green-400' 
                         : `${category.color}`
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-bold text-lg text-gray-800">{category.label}</h3>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <h3 className="text-sm font-medium text-gray-700">{category.label}</h3>
                       {isComplete && (
-                        <div className="bg-green-500 rounded-full p-1">
-                          <Check className="w-5 h-5 text-white" />
+                        <div className="bg-green-500 rounded-full p-0.5">
+                          <Check className="w-4 h-4 text-white" />
                         </div>
                       )}
                     </div>
@@ -616,7 +625,7 @@ const DailyTracker = () => {
                       value={currentEntry[category.key] || ''}
                       onChange={(e) => handleInputChange(category.key, e.target.value)}
                       placeholder={`What did you do that was ${category.label.toLowerCase()}?`}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none bg-white"
+                      className="w-full px-2.5 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none bg-white"
                       rows="2"
                     />
                   </div>
@@ -625,19 +634,19 @@ const DailyTracker = () => {
             </div>
 
             {/* Notes Section */}
-            <div className="bg-white rounded-xl shadow-lg p-5 flex-shrink-0">
-              <h3 className="font-bold text-lg text-gray-800 mb-3">Other Notes on Today:</h3>
+            <div className="bg-white rounded-xl shadow-lg p-4 flex-shrink-0">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Other Notes on Today:</h3>
               <textarea
                 value={currentEntry.notes || ''}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
                 placeholder="Any other thoughts, reflections, or notes about your day..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
-                rows="4"
+                className="w-full px-2.5 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
+                rows="3"
               />
             </div>
 
             {/* Auto-save indicator */}
-            <div className="text-center text-sm text-gray-500 flex-shrink-0 pb-2">
+            <div className="text-center text-xs text-gray-500 flex-shrink-0 pb-2">
               ✓ Changes saved automatically to cloud
             </div>
           </div>
