@@ -42,6 +42,7 @@ const DailyTracker = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState('freeform');
   const [userSettings, setUserSettings] = useState({
     theme: 'default',
     visibleCategories: {
@@ -161,6 +162,100 @@ const DailyTracker = () => {
         mindful: 'bg-gray-100 border-gray-400'
       }
     }
+  };
+
+  const journalTemplates = {
+    freeform: {
+      name: 'Free Form',
+      content: '',
+      showPrompt: false
+    },
+    prompt: {
+      name: 'Daily Prompt',
+      content: '',
+      showPrompt: true
+    },
+    gratitude: {
+      name: 'Gratitude',
+      content: `Three things I'm grateful for today:
+1. 
+2. 
+3. 
+
+Why today mattered:
+`,
+      showPrompt: false
+    },
+    reflection: {
+      name: 'Reflection',
+      content: `What went well today:
+
+What could have gone better:
+
+What I learned:
+
+Tomorrow I will:
+`,
+      showPrompt: false
+    },
+    wins: {
+      name: 'Wins & Challenges',
+      content: `Today's wins:
+• 
+• 
+
+Today's challenges:
+• 
+
+How I handled them:
+`,
+      showPrompt: false
+    },
+    bullets: {
+      name: 'Quick Bullets',
+      content: `• 
+• 
+• 
+• 
+• 
+`,
+      showPrompt: false
+    }
+  };
+
+  const dailyPrompts = [
+    "What made you smile today?",
+    "What challenged you and how did you handle it?",
+    "What are you looking forward to tomorrow?",
+    "Who did you help or connect with today?",
+    "What's one thing you learned today?",
+    "What would you do differently if you could replay today?",
+    "What are you proud of accomplishing today?",
+    "How did you take care of yourself today?",
+    "What moment today will you remember?",
+    "What are you letting go of from today?",
+    "What made today unique or special?",
+    "How did you grow today?",
+    "What brought you peace or calm today?",
+    "What would you tell your future self about today?",
+    "What energized you today?",
+    "What drained your energy today?",
+    "What kindness did you witness or receive?",
+    "What are you curious about after today?",
+    "What pattern did you notice about yourself today?",
+    "What would make tomorrow even better?"
+  ];
+
+  const getDailyPrompt = (date) => {
+    const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+    return dailyPrompts[dayOfYear % dailyPrompts.length];
+  };
+
+  const applyTemplate = (templateKey) => {
+    setSelectedTemplate(templateKey);
+    const template = journalTemplates[templateKey];
+    // Apply template content, replacing current notes
+    handleInputChange('notes', template.content);
   };
 
   const categories = [
@@ -635,13 +730,39 @@ const DailyTracker = () => {
 
             {/* Notes Section */}
             <div className="bg-white rounded-xl shadow-lg p-4 flex-shrink-0">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Other Notes on Today:</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-gray-700">Journal</h3>
+                <select
+                  value={selectedTemplate}
+                  onChange={(e) => applyTemplate(e.target.value)}
+                  className="text-xs px-2 py-1 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none bg-white"
+                >
+                  {Object.keys(journalTemplates).map((key) => (
+                    <option key={key} value={key}>{journalTemplates[key].name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Daily Prompt - Only show when Prompt template is selected */}
+              {journalTemplates[selectedTemplate].showPrompt && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                  <p className="text-xs font-medium text-blue-800 mb-1">💭 Today's Prompt:</p>
+                  <p className="text-sm text-blue-900 italic">{getDailyPrompt(selectedDate)}</p>
+                </div>
+              )}
+
               <textarea
                 value={currentEntry.notes || ''}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
-                placeholder="Any other thoughts, reflections, or notes about your day..."
+                placeholder={
+                  selectedTemplate === 'freeform' 
+                    ? "Any other thoughts, reflections, or notes about your day..." 
+                    : selectedTemplate === 'prompt'
+                    ? "Answer the prompt above or write about your day..."
+                    : "Fill in the template or write freely..."
+                }
                 className="w-full px-2.5 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
-                rows="3"
+                rows="8"
               />
             </div>
 
