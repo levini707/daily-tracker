@@ -1,0 +1,22 @@
+export const dailyPrompts = [
+  "What made you smile today?",
+  "What challenged you and how did you handle it?",
+  "What are you looking forward to tomorrow?",
+  "Who did you help or connect with today?",
+  "What's one thing you learned today?",
+  "What would you do differently if you could replay today?",
+  "What are you proud of accomplishing today?",
+  "How did you take care of yourself today?",
+  "What moment today will you remember?",
+  "What are you letting go of from today?",
+  "What made today unique or special?",
+  "How did you grow today?",
+  "What brought you peace or calm today?",
+  "What would you tell your future self about today?",
+  "What energized you today?",
+  "What drained your energy today?",
+  "What kindness did you witness or receive?",
+  "What are you curious about after today?",
+  "What pattern did you notice about yourself today?",
+  "What would make tomorrow even better?"
+];
