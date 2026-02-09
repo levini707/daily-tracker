@@ -96,5 +96,19 @@ export const themePresets = {
       kind: 'bg-neutral-100 border-neutral-300',
       mindful: 'bg-gray-100 border-gray-400'
     }
+  },
+  valentine: {
+    name: 'Valentine ❤️',
+    background: 'from-pink-100 to-rose-200',
+    complete: 'bg-rose-500',
+    partial: 'bg-pink-300',
+    categories: {
+      productive: 'bg-pink-100 border-pink-300',
+      healthy: 'bg-rose-100 border-rose-300',
+      social: 'bg-fuchsia-100 border-fuchsia-300',
+      creative: 'bg-pink-200 border-pink-400',
+      kind: 'bg-red-100 border-red-300',
+      mindful: 'bg-rose-200 border-rose-400'
+    }
   }
 };

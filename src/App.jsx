@@ -4,9 +4,11 @@ import LoginForm from './components/auth/LoginForm';
 import Calendar from './components/Calendar';
 import CategoryCard from './components/CategoryCard';
 import DayRating from './components/DayRating';
-import ProgressBar from './components/ProgressBar';
+import MoodRating from './components/MoodRating';
 import JournalSection from './components/JournalSection';
 import SettingsModal from './components/SettingsModal';
+import FloatingHearts from './components/FloatingHearts';
+import ValentineBackground from './components/ValentineBackground';
 import { useAuth } from './hooks/useAuth';
 import { useUserData } from './hooks/useUserData';
 import { themePresets } from './constants/themes';
@@ -25,7 +27,8 @@ const DailyTracker = () => {
     kind: '',
     mindful: '',
     notes: '',
-    rating: null
+    rating: null,
+    mood: null
   });
   const [showCelebration, setShowCelebration] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -55,7 +58,8 @@ const DailyTracker = () => {
           kind: '',
           mindful: '',
           notes: '',
-          rating: null
+          rating: null,
+          mood: null
         });
       }
     }
@@ -124,7 +128,8 @@ const DailyTracker = () => {
       kind: '',
       mindful: '',
       notes: '',
-      rating: null
+      rating: null,
+      mood: null
     });
   };
 
@@ -153,7 +158,15 @@ const DailyTracker = () => {
   const totalVisible = getTotalVisibleCategories();
 
   return (
-    <div className={`h-screen bg-gradient-to-br ${themePresets[userSettings.theme].background} flex flex-col overflow-hidden`}>
+    <div className={`h-screen bg-gradient-to-br ${themePresets[userSettings.theme].background} flex flex-col overflow-hidden relative`}>
+      {/* Valentine Theme Special Effects */}
+      {userSettings.theme === 'valentine' && (
+        <>
+          <ValentineBackground />
+          <FloatingHearts />
+        </>
+      )}
+      
       {/* Header - Fixed at top */}
       <div className="flex-shrink-0 px-6 py-3 bg-white shadow-sm border-b">
         <div className="max-w-[1800px] mx-auto flex items-center justify-between">
@@ -196,9 +209,10 @@ const DailyTracker = () => {
 
           {/* Right Side - Entry Fields */}
           <div className="flex flex-col gap-3 overflow-y-auto pr-2">
-            <ProgressBar
-              completionCount={completionCount}
-              totalVisible={totalVisible}
+            <MoodRating
+              mood={currentEntry.mood}
+              onMoodChange={(mood) => handleInputChange('mood', mood)}
+              theme={themePresets[userSettings.theme]}
             />
 
             <DayRating
