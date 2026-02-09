@@ -103,7 +103,7 @@ const MoodRating = ({ mood, onMoodChange, theme }) => {
   return (
     <div className="bg-white rounded-xl shadow-lg p-3 flex-shrink-0">
       <h3 className="text-sm font-medium text-gray-700 mb-2">How do you feel today?</h3>
-      <div className="flex gap-1 sm:gap-1.5 justify-between sm:justify-center">
+      <div className="flex gap-0.5 sm:gap-2 justify-center">
         {moods.map((moodOption) => (
           <div key={moodOption.value} className="relative flex-shrink-0">
             {/* Sparkles around the box for Great mood when selected */}
@@ -119,16 +119,16 @@ const MoodRating = ({ mood, onMoodChange, theme }) => {
             )}
             <button
               onClick={() => onMoodChange(moodOption.value)}
-              className={`flex flex-col items-center gap-0.5 sm:gap-1 p-1 sm:p-2 rounded-lg border-2 transition-all ${
+              className={`flex flex-col items-center gap-1 p-2 sm:p-2.5 rounded-xl border-2 transition-all ${
                 mood === moodOption.value
                   ? `${moodOption.bgColor} border-gray-400 shadow-lg scale-115`
                   : `${moodOption.bgColor} border-gray-300 hover:border-gray-400 hover:scale-105 opacity-60 hover:opacity-90`
               }`}
             >
-              <div className="w-8 h-8 sm:w-10 sm:h-10">
+              <div className="w-11 h-11 sm:w-12 sm:h-12">
                 {moodOption.icon}
               </div>
-              <span className="text-[8px] sm:text-[10px] font-semibold text-gray-800 whitespace-nowrap">
+              <span className="text-[9px] sm:text-[10px] font-semibold text-gray-800 whitespace-nowrap hidden sm:block">
                 {moodOption.label}
               </span>
             </button>
