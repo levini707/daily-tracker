@@ -1,7 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { getDaysInMonth, monthNames } from '../utils/dateUtils';
 
 const Calendar = ({ selectedDate, onDateSelect, onMonthChange, getCompletionStatus, theme }) => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Auto-collapse on mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) { // lg breakpoint
+        setIsCollapsed(true);
+      }
+    };
+
+    handleResize(); // Check on mount
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(selectedDate);
   const days = [];
 
@@ -32,30 +48,59 @@ const Calendar = ({ selectedDate, onDateSelect, onMonthChange, getCompletionStat
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-4 flex-shrink-0">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-white rounded-xl shadow-lg flex-shrink-0 overflow-hidden">
+      {/* Header - Always Visible */}
+      <div className="p-4 border-b flex items-center justify-between">
+        <div className="flex items-center gap-3 flex-1">
+          {!isCollapsed && (
+            <>
+              <button
+                onClick={() => onMonthChange(-1)}
+                className="px-3 py-1.5 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 font-medium"
+              >
+                ←
+              </button>
+              <h2 className="text-xl font-semibold">{monthNames[month]} {year}</h2>
+              <button
+                onClick={() => onMonthChange(1)}
+                className="px-3 py-1.5 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 font-medium"
+              >
+                →
+              </button>
+            </>
+          )}
+          {isCollapsed && (
+            <h2 className="text-lg font-semibold text-gray-800">
+              {monthNames[month]} {year}
+            </h2>
+          )}
+        </div>
         <button
-          onClick={() => onMonthChange(-1)}
-          className="px-3 py-1.5 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 font-medium"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+          aria-label={isCollapsed ? "Expand calendar" : "Collapse calendar"}
         >
-          ←
-        </button>
-        <h2 className="text-xl font-semibold">{monthNames[month]} {year}</h2>
-        <button
-          onClick={() => onMonthChange(1)}
-          className="px-3 py-1.5 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 font-medium"
-        >
-          →
+          {isCollapsed ? (
+            <ChevronDown className="w-5 h-5 text-gray-600" />
+          ) : (
+            <ChevronUp className="w-5 h-5 text-gray-600" />
+          )}
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-1.5 mb-2">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
-          <div key={idx} className="text-center font-medium text-gray-600 text-xs">{day}</div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7 gap-2">
-        {days}
-      </div>
+
+      {/* Calendar Grid - Collapsible */}
+      {!isCollapsed && (
+        <div className="p-4">
+          <div className="grid grid-cols-7 gap-1.5 mb-2">
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
+              <div key={idx} className="text-center font-medium text-gray-600 text-xs">{day}</div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-2">
+            {days}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
