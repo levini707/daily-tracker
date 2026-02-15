@@ -71,7 +71,7 @@ const Calendar = ({ selectedDate, onDateSelect, onMonthChange, getCompletionStat
           )}
           {isCollapsed && (
             <h2 className="text-lg font-semibold text-gray-800">
-              {monthNames[month]} {year}
+              {monthNames[month]} {selectedDate.getDate()}, {year}
             </h2>
           )}
         </div>

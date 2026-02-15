@@ -6,6 +6,7 @@ export const useUserData = (userId) => {
   const [entries, setEntries] = useState({});
   const [userSettings, setUserSettings] = useState({
     theme: 'default',
+    displayName: '',
     visibleCategories: {
       productive: true,
       healthy: true,
