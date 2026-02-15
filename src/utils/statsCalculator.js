@@ -91,6 +91,7 @@ export const calculateMonthlyStats = (entries, visibleCategories, year, month) =
     if (entries[dateKey]) {
       monthEntries.push({
         date,
+        dayOfWeek: date.getDay(),
         ...entries[dateKey]
       });
     }
@@ -142,6 +143,109 @@ export const calculateMonthlyStats = (entries, visibleCategories, year, month) =
     }
   }
   
+  // Day of week analysis
+  const dayOfWeekStats = {};
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  
+  for (let day = 0; day < 7; day++) {
+    const dayEntries = monthEntries.filter(e => e.dayOfWeek === day);
+    if (dayEntries.length > 0) {
+      const dayRatings = dayEntries.filter(e => e.rating).map(e => e.rating);
+      const dayMoods = dayEntries.filter(e => e.mood).map(e => e.mood);
+      
+      dayOfWeekStats[day] = {
+        name: dayNames[day],
+        count: dayEntries.length,
+        avgRating: dayRatings.length > 0 ? dayRatings.reduce((a, b) => a + b, 0) / dayRatings.length : null,
+        avgMood: dayMoods.length > 0 ? dayMoods.reduce((a, b) => a + b, 0) / dayMoods.length : null,
+        moods: dayMoods // Array of individual moods for that day of week
+      };
+    }
+  }
+  
+  // Category correlations with mood
+  const moodCorrelations = {};
+  visibleCategories.forEach(cat => {
+    const withCategory = monthEntries.filter(e => e[cat]?.trim() !== '' && e.mood);
+    const withoutCategory = monthEntries.filter(e => e[cat]?.trim() === '' && e.mood);
+    
+    if (withCategory.length > 0 && withoutCategory.length > 0) {
+      const avgMoodWith = withCategory.reduce((sum, e) => sum + e.mood, 0) / withCategory.length;
+      const avgMoodWithout = withoutCategory.reduce((sum, e) => sum + e.mood, 0) / withoutCategory.length;
+      
+      moodCorrelations[cat] = {
+        avgWith: avgMoodWith,
+        avgWithout: avgMoodWithout,
+        difference: avgMoodWith - avgMoodWithout,
+        sampleSizeWith: withCategory.length,
+        sampleSizeWithout: withoutCategory.length
+      };
+    }
+  });
+  
+  // Category correlations with rating
+  const ratingCorrelations = {};
+  visibleCategories.forEach(cat => {
+    const withCategory = monthEntries.filter(e => e[cat]?.trim() !== '' && e.rating);
+    const withoutCategory = monthEntries.filter(e => e[cat]?.trim() === '' && e.rating);
+    
+    if (withCategory.length > 0 && withoutCategory.length > 0) {
+      const avgRatingWith = withCategory.reduce((sum, e) => sum + e.rating, 0) / withCategory.length;
+      const avgRatingWithout = withoutCategory.reduce((sum, e) => sum + e.rating, 0) / withoutCategory.length;
+      
+      ratingCorrelations[cat] = {
+        avgWith: avgRatingWith,
+        avgWithout: avgRatingWithout,
+        difference: avgRatingWith - avgRatingWithout,
+        sampleSizeWith: withCategory.length,
+        sampleSizeWithout: withoutCategory.length
+      };
+    }
+  });
+  
+  // Journal correlation
+  const withJournal = monthEntries.filter(e => e.notes?.trim() !== '');
+  const withoutJournal = monthEntries.filter(e => !e.notes?.trim());
+  
+  const journalCorrelation = {
+    mood: null,
+    rating: null
+  };
+  
+  if (withJournal.length > 0 && withoutJournal.length > 0) {
+    const withJournalMoods = withJournal.filter(e => e.mood);
+    const withoutJournalMoods = withoutJournal.filter(e => e.mood);
+    
+    if (withJournalMoods.length > 0 && withoutJournalMoods.length > 0) {
+      const avgMoodWith = withJournalMoods.reduce((sum, e) => sum + e.mood, 0) / withJournalMoods.length;
+      const avgMoodWithout = withoutJournalMoods.reduce((sum, e) => sum + e.mood, 0) / withoutJournalMoods.length;
+      
+      journalCorrelation.mood = {
+        avgWith: avgMoodWith,
+        avgWithout: avgMoodWithout,
+        difference: avgMoodWith - avgMoodWithout,
+        sampleSizeWith: withJournalMoods.length,
+        sampleSizeWithout: withoutJournalMoods.length
+      };
+    }
+    
+    const withJournalRatings = withJournal.filter(e => e.rating);
+    const withoutJournalRatings = withoutJournal.filter(e => e.rating);
+    
+    if (withJournalRatings.length > 0 && withoutJournalRatings.length > 0) {
+      const avgRatingWith = withJournalRatings.reduce((sum, e) => sum + e.rating, 0) / withJournalRatings.length;
+      const avgRatingWithout = withoutJournalRatings.reduce((sum, e) => sum + e.rating, 0) / withoutJournalRatings.length;
+      
+      journalCorrelation.rating = {
+        avgWith: avgRatingWith,
+        avgWithout: avgRatingWithout,
+        difference: avgRatingWith - avgRatingWithout,
+        sampleSizeWith: withJournalRatings.length,
+        sampleSizeWithout: withoutJournalRatings.length
+      };
+    }
+  }
+  
   return {
     year,
     month,
@@ -151,7 +255,11 @@ export const calculateMonthlyStats = (entries, visibleCategories, year, month) =
     avgRating: avgRating ? Math.round(avgRating * 10) / 10 : null,
     categoryStats,
     moodBreakdown,
-    longestStreak: maxStreak
+    longestStreak: maxStreak,
+    dayOfWeekStats,
+    moodCorrelations,
+    ratingCorrelations,
+    journalCorrelation
   };
 };
 
