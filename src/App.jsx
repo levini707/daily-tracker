@@ -6,6 +6,7 @@ import CategoryCard from './components/CategoryCard';
 import DayRating from './components/DayRating';
 import MoodRating from './components/MoodRating';
 import JournalSection from './components/JournalSection';
+import SettingsModal from './components/SettingsModal';
 import SettingsView from './components/SettingsView';
 import FloatingHearts from './components/FloatingHearts';
 import ValentineBackground from './components/ValentineBackground';
@@ -18,7 +19,7 @@ import { formatDateKey } from './utils/dateUtils';
 
 const DailyTracker = () => {
   const { currentUser, loading: authLoading, authError, signup, login, logout, setAuthError } = useAuth();
-  const { entries, userSettings, loading: dataLoading, saveEntry, saveSettings } = useUserData(currentUser?.uid);
+  const { entries, userSettings, loading: dataLoading, saveEntry, saveSettings, setUserSettings } = useUserData(currentUser?.uid);
   
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentEntry, setCurrentEntry] = useState({
@@ -33,8 +34,10 @@ const DailyTracker = () => {
     mood: null
   });
   const [showCelebration, setShowCelebration] = useState(false);
-  const [activeTab, setActiveTab] = useState('journal');
+  const [showSettings, setShowSettings] = useState(false);
+  const [activeTab, setActiveTab] = useState('journal'); // 'journal', 'feed', 'settings'
 
+  // Get visible categories based on user settings
   const categories = [
     { key: 'productive', label: userSettings.customNames.productive, color: themePresets[userSettings.theme].categories.productive },
     { key: 'healthy', label: userSettings.customNames.healthy, color: themePresets[userSettings.theme].categories.healthy },
@@ -44,6 +47,7 @@ const DailyTracker = () => {
     { key: 'mindful', label: userSettings.customNames.mindful, color: themePresets[userSettings.theme].categories.mindful }
   ].filter(cat => userSettings.visibleCategories[cat.key]);
 
+  // Load entry for selected date
   useEffect(() => {
     if (currentUser) {
       const dateKey = formatDateKey(selectedDate);
@@ -75,6 +79,7 @@ const DailyTracker = () => {
       saveEntry(currentUser.uid, dateKey, newEntry);
     }
 
+    // Check if all visible categories are complete
     const visibleCats = ['productive', 'healthy', 'social', 'creative', 'kind', 'mindful']
       .filter(key => userSettings.visibleCategories[key]);
     const isComplete = visibleCats.every(key => newEntry[key]?.trim() !== '');
@@ -132,6 +137,7 @@ const DailyTracker = () => {
     });
   };
 
+  // Show login screen if not authenticated
   if (!currentUser) {
     return (
       <LoginForm
@@ -143,6 +149,7 @@ const DailyTracker = () => {
     );
   }
 
+  // Show loading screen while fetching data
   if (authLoading || dataLoading) {
     return (
       <div className="h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
@@ -151,8 +158,12 @@ const DailyTracker = () => {
     );
   }
 
+  const completionCount = getCompletionCount(currentEntry);
+  const totalVisible = getTotalVisibleCategories();
+
   return (
     <div className={`h-screen bg-gradient-to-br ${themePresets[userSettings.theme].background} flex flex-col overflow-hidden relative`}>
+      {/* Valentine Theme Special Effects */}
       {userSettings.theme === 'valentine' && (
         <>
           <ValentineBackground />
@@ -160,15 +171,18 @@ const DailyTracker = () => {
         </>
       )}
       
+      {/* Header - Fixed at top */}
       <div className="flex-shrink-0 px-6 py-3 bg-white shadow-sm border-b">
         <div className="max-w-[1800px] mx-auto">
           <h1 className="text-2xl font-bold text-gray-800">
-            {activeTab === 'journal' && 'Daily Tracker'}
+            {activeTab === 'journal' && 'PHSCKM Tracker'}
             {activeTab === 'feed' && 'Your Journey'}
             {activeTab === 'settings' && 'Settings'}
           </h1>
           {activeTab === 'journal' && (
-            <p className="text-gray-500 text-xs">{selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
+            <p className="text-gray-500 text-xs">
+              {userSettings.displayName ? `Welcome ${userSettings.displayName}` : 'Welcome!'}
+            </p>
           )}
           {activeTab === 'feed' && (
             <p className="text-gray-500 text-xs">Review your progress</p>
@@ -176,10 +190,12 @@ const DailyTracker = () => {
         </div>
       </div>
 
+      {/* Main Content - Tab-based */}
       <div className="flex-1 overflow-hidden pb-20">
         {activeTab === 'journal' && (
           <div className="h-full p-6 overflow-hidden">
             <div className="h-full max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Side - Calendar */}
               <div className="flex flex-col gap-3 overflow-y-auto pr-2">
                 <Calendar
                   selectedDate={selectedDate}
@@ -190,82 +206,95 @@ const DailyTracker = () => {
                 />
               </div>
 
-              <div className="flex flex-col gap-3 overflow-y-auto pr-2">
-                <MoodRating
-                  mood={currentEntry.mood}
-                  onMoodChange={(mood) => handleInputChange('mood', mood)}
-                  theme={themePresets[userSettings.theme]}
-                />
+                {/* Right Side - Entry Fields */}
+                <div className="flex flex-col gap-3 overflow-y-auto pr-2">
+                  <MoodRating
+                    mood={currentEntry.mood}
+                    onMoodChange={(mood) => handleInputChange('mood', mood)}
+                    theme={themePresets[userSettings.theme]}
+                  />
 
-                <DayRating
-                  rating={currentEntry.rating}
-                  onRatingChange={(rating) => handleInputChange('rating', rating)}
-                />
+                  <DayRating
+                    rating={currentEntry.rating}
+                    onRatingChange={(rating) => handleInputChange('rating', rating)}
+                  />
 
-                {showCelebration && (
-                  <div className="bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-xl shadow-lg p-3 flex items-center animate-bounce flex-shrink-0">
-                    <Sparkles className="w-5 h-5 mr-2.5" />
-                    <div>
-                      <h3 className="text-base font-semibold">Congratulations!</h3>
-                      <p className="text-xs">You've completed all areas today! 🎉</p>
+                  {/* Celebration Message */}
+                  {showCelebration && (
+                    <div className="bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-xl shadow-lg p-3 flex items-center animate-bounce flex-shrink-0">
+                      <Sparkles className="w-5 h-5 mr-2.5" />
+                      <div>
+                        <h3 className="text-base font-semibold">Congratulations!</h3>
+                        <p className="text-xs">You've completed all areas today! 🎉</p>
+                      </div>
                     </div>
+                  )}
+
+                  {/* Category Cards */}
+                  <div className="grid grid-cols-1 gap-3">
+                    {categories.map((category) => (
+                      <CategoryCard
+                        key={category.key}
+                        category={category}
+                        value={currentEntry[category.key]}
+                        onChange={(value) => handleInputChange(category.key, value)}
+                      />
+                    ))}
                   </div>
-                )}
 
-                <div className="grid grid-cols-1 gap-3">
-                  {categories.map((category) => (
-                    <CategoryCard
-                      key={category.key}
-                      category={category}
-                      value={currentEntry[category.key]}
-                      onChange={(value) => handleInputChange(category.key, value)}
-                    />
-                  ))}
-                </div>
+                  <JournalSection
+                    notes={currentEntry.notes}
+                    onNotesChange={(value) => handleInputChange('notes', value)}
+                    selectedDate={selectedDate}
+                  />
 
-                <JournalSection
-                  notes={currentEntry.notes}
-                  onNotesChange={(value) => handleInputChange('notes', value)}
-                  selectedDate={selectedDate}
-                />
-
-                <div className="text-center text-xs text-gray-500 flex-shrink-0 pb-2">
-                  ✓ Changes saved automatically to cloud
+                  {/* Auto-save indicator */}
+                  <div className="text-center text-xs text-gray-500 flex-shrink-0 pb-2">
+                    ✓ Changes saved automatically to cloud
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'feed' && (
-          <div className="h-full p-6 overflow-hidden">
-            <div className="h-full max-w-4xl mx-auto">
-              <FeedView
-                entries={entries}
-                visibleCategories={userSettings.visibleCategories}
-                customNames={userSettings.customNames}
-                theme={themePresets[userSettings.theme]}
+          {activeTab === 'feed' && (
+            <div className="h-full p-6 overflow-hidden">
+              <div className="h-full max-w-4xl mx-auto">
+                <FeedView
+                  entries={entries}
+                  visibleCategories={userSettings.visibleCategories}
+                  customNames={userSettings.customNames}
+                  theme={themePresets[userSettings.theme]}
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'settings' && (
+            <div className="h-full p-6">
+              <SettingsView
+                userSettings={userSettings}
+                onUpdateSettings={handleUpdateSettings}
+                onLogout={handleLogout}
+                currentUserEmail={currentUser.email}
               />
             </div>
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="h-full p-6">
-            <SettingsView
-              userSettings={userSettings}
-              onUpdateSettings={handleUpdateSettings}
-              onLogout={handleLogout}
-              currentUserEmail={currentUser.email}
-            />
-          </div>
-        )}
+          )}
       </div>
 
+      {/* Bottom Dock Navigation */}
       <BottomDock
         activeTab={activeTab}
         onTabChange={setActiveTab}
         theme={themePresets[userSettings.theme]}
+      />
+
+      {/* Settings Modal - Keep for backward compatibility */}
+      <SettingsModal
+        show={showSettings && activeTab !== 'settings'}
+        onClose={() => setShowSettings(false)}
+        userSettings={userSettings}
+        onUpdateSettings={handleUpdateSettings}
       />
     </div>
   );

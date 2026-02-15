@@ -19,11 +19,6 @@ const DayRating = ({ rating, onRatingChange }) => {
           </button>
         ))}
       </div>
-      {rating && (
-        <p className="text-center mt-2 text-xs text-gray-600">
-          You rated today: <span className="font-bold text-blue-600">{rating}/10</span>
-        </p>
-      )}
     </div>
   );
 };
