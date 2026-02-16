@@ -1,6 +1,7 @@
 import React from 'react';
 import { LogOut } from 'lucide-react';
 import { themePresets } from '../constants/themes';
+import TrackerSettings from './TrackerSettings';
 
 const SettingsView = ({ userSettings, onUpdateSettings, onLogout, currentUserEmail }) => {
   const updateTheme = (themeKey) => {
@@ -24,6 +25,13 @@ const SettingsView = ({ userSettings, onUpdateSettings, onLogout, currentUserEma
         ...userSettings.customNames,
         [categoryKey]: name
       }
+    });
+  };
+
+  const updateTrackerSettings = (newTrackerSettings) => {
+    onUpdateSettings({
+      ...userSettings,
+      trackerItems: newTrackerSettings
     });
   };
 
@@ -52,9 +60,15 @@ const SettingsView = ({ userSettings, onUpdateSettings, onLogout, currentUserEma
           </div>
         </div>
 
+        {/* Day Tracker Items */}
+        <TrackerSettings
+          trackerSettings={userSettings.trackerItems || { habits: [], dayDetails: [], nightDetails: [] }}
+          onUpdateTrackerSettings={updateTrackerSettings}
+        />
+
         {/* Toggle Categories */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-3">Visible Categories</h3>
+          <h3 className="text-lg font-bold text-gray-800 mb-3">PHSCKM Categories</h3>
           <p className="text-sm text-gray-600 mb-4">Choose which categories to track</p>
           <div className="space-y-3">
             {['productive', 'healthy', 'social', 'creative', 'kind', 'mindful'].map((key) => (
@@ -69,13 +83,12 @@ const SettingsView = ({ userSettings, onUpdateSettings, onLogout, currentUserEma
               </label>
             ))}
           </div>
-          <p className="text-xs text-gray-500 mt-2">Note: You need at least one category visible</p>
         </div>
 
         {/* Custom Category Names */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-3">Change Your Categories</h3>
-          <p className="text-sm text-gray-600 mb-4">Name your categories</p>
+          <h3 className="text-lg font-bold text-gray-800 mb-3">Rename PHSCKM Categories</h3>
+          <p className="text-sm text-gray-600 mb-4">Customize your category names</p>
           <div className="space-y-3">
             {['productive', 'healthy', 'social', 'creative', 'kind', 'mindful'].map((key, index) => (
               <div key={key} className="flex items-center gap-3">
@@ -87,7 +100,6 @@ const SettingsView = ({ userSettings, onUpdateSettings, onLogout, currentUserEma
                   value={userSettings.customNames[key]}
                   onChange={(e) => updateCategoryName(key, e.target.value)}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                  placeholder={`Enter name for category ${index + 1}`}
                 />
               </div>
             ))}

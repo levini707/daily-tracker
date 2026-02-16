@@ -1,6 +1,20 @@
 import { useState, useEffect } from 'react';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { suggestedHabits, suggestedDayDetails, suggestedNightDetails } from '../constants/dayTrackerItems';
+
+// Get popular items by default
+const getPopularItems = (suggestedItems) => {
+  const popular = [];
+  Object.values(suggestedItems).forEach(category => {
+    category.forEach(item => {
+      if (item.popular) {
+        popular.push(item);
+      }
+    });
+  });
+  return popular;
+};
 
 export const useUserData = (userId) => {
   const [entries, setEntries] = useState({});
@@ -22,6 +36,11 @@ export const useUserData = (userId) => {
       creative: 'Creative',
       kind: 'Kind',
       mindful: 'Mindful'
+    },
+    trackerItems: {
+      habits: getPopularItems(suggestedHabits),
+      dayDetails: getPopularItems(suggestedDayDetails),
+      nightDetails: getPopularItems(suggestedNightDetails)
     }
   });
   const [loading, setLoading] = useState(true);
